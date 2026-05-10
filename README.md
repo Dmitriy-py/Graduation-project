@@ -4,7 +4,7 @@
 
 ## 🚀 Обзор проекта
 
-Данный проект демонстрирует построение современной, масштабируемой и отказоустойчивой IT-инфраструктуры в облачной среде Yandex Cloud. Проект охватывает все этапы: от автоматизированного создания базовой инфраструктуры и развертывания кластера Kubernetes до внедрения комплексной системы мониторинга и централизованного сбора логов. Все компоненты управляются с помощью кода (Infrastructure as Code, Configuration as Code) и автоматизированных CI/CD пайплайнов.
+Данный проект демонстрирует построение современной, масштабируемой и отказоустойчивой IT-инфраструктуры в облачной среде `Yandex Cloud`. Проект охватывает все этапы: от автоматизированного создания базовой инфраструктуры и развертывания кластера `Kubernetes` до внедрения комплексной системы мониторинга и централизованного сбора логов. Все компоненты управляются с помощью кода `(Infrastructure as Code, Configuration as Code)` и автоматизированных `CI/CD` пайплайнов.
 
 ---
 
@@ -18,7 +18,7 @@
     *   Настроенные конфигурации для Yandex Cloud, включая Calico CNI и Nginx Ingress Controller.
 *   **Application & CI/CD:** [diploma-app](https://github.com/Dmitriy-py/diploma-app)
     *   Пример простого веб-приложения.
-    *   CI/CD пайплайн для автоматической сборки Docker-образов и их развертывания в кластер Kubernetes.
+    *   `CI/CD` пайплайн для автоматической сборки Docker-образов и их развертывания в кластер Kubernetes.
 
 ---
 
@@ -26,10 +26,10 @@
 
 ### 1.1. Описание
 Terraform используется для декларативного управления облачными ресурсами. Были созданы:
-*   Виртуальное облако (VPC)
+*   Виртуальное облако `(VPC)`
 *   Подсети в трех зонах доступности
 *   NAT Gateway для исходящего доступа из подсетей
-*   Три виртуальные машины: 1 Master-Node (control-plane) и 2 Worker-Nodes.
+*   Три виртуальные машины: 1 `Master-Node` `(control-plane)` и 2 `Worker-Nodes`.
 *   Настроен SSH-доступ.
 
 ---
@@ -63,20 +63,20 @@ terraform apply -auto-approve
 
 ---
 
-## 2. Развертывание кластера Kubernetes (Kubespray)
+## 2. Развертывание кластера `Kubernetes` `(Kubespray)`
 
 ### 2.1. Описание
 
-Kubespray, основанный на Ansible, автоматизирует процесс установки и настройки Kubernetes. Был выбран Kubernetes версии v1.35.4.
+Kubespray, основанный на `Ansible`, автоматизирует процесс установки и настройки Kubernetes. Был выбран `Kubernetes` версии v1.35.4.
 
 ---
 
 ### 2.2.  Процесс развертывания
 
-   1. Клонирование репозитория Kubespray.
-   2. Настройка файла инвентаря (inventory/mycluster/hosts.yaml) с IP-адресами, полученными от Terraform.
-   3. Настройка конфигурационных файлов (inventory/mycluster/group_vars/) для выбора containerd как рантайма и calico в качестве CNI.
-   4. Активация виртуального окружения Python.
+   1. Клонирование репозитория `Kubespray`.
+   2. Настройка файла инвентаря `(inventory/mycluster/hosts.yaml)` с IP-адресами, полученными от `Terraform`.
+   3. Настройка конфигурационных файлов `(inventory/mycluster/group_vars/)` для выбора `containerd` как рантайма и `calico` в качестве `CNI`.
+   4. Активация виртуального окружения `Python`.
 
 ---
 
@@ -103,8 +103,8 @@ ansible-playbook -i inventory/mycluster/hosts.yaml cluster.yml -b -v
 
 ### 3.1. Описание
 
-Для обеспечения внешнего доступа к сервисам кластера развернут Nginx Ingress Controller.
-   * Выбор: Использован тип сервиса NodePort (порт 30080) для прямого доступа к Ingress Controller.
+Для обеспечения внешнего доступа к сервисам кластера развернут `Nginx Ingress Controller`.
+   * Выбор: Использован тип сервиса `NodePort` (порт 30080) для прямого доступа к `Ingress Controller`.
    * DNS: Для удобства использован сервис nip.io для привязки доменных имен к IP-адресам.
 
 ---
@@ -121,9 +121,9 @@ helm install ingress-nginx ingress-nginx/ingress-nginx \
 
 ---
 
-### 3.3. Манифест Ingress для Grafana
+### 3.3. Манифест `Ingress` для `Grafana`
 
- Данный манифест направляет трафик на сервис Grafana.
+ Данный манифест направляет трафик на сервис `Grafana`.
  ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -147,11 +147,11 @@ spec:
 ```
 ---
 
-## 4. CI/CD для приложения
+## 4. `CI/CD` для приложения
 
 ### 4.1. Описание
 
-Разработан пайплайн непрерывной интеграции и доставки (CI/CD) для приложения с использованием GitHub Actions.
+Разработан пайплайн непрерывной интеграции и доставки `(CI/CD)` для приложения с использованием `GitHub Actions`.
 
 ---
 
@@ -159,14 +159,14 @@ spec:
 
   * [diploma-app](https://github.com/Dmitriy-py/diploma-app)
 
-### 4.3. Workflow CI/CD (.github/workflows/deploy.yml)
+### 4.3. Workflow `CI/CD (.github/workflows/deploy.yml)`
 
 ---
 
 Пайплайн автоматизирует следующие шаги:
   1. Сборка Docker-образа: Создание образа приложения.
-  2. Push Образа: Отправка собранного образа в Yandex Container Registry.
-  3. Deploy: Применение манифестов Kubernetes (Deployment, Service, Ingress) для развертывания новой версии приложения в             кластер.
+  2. Push Образа: Отправка собранного образа в `Yandex Container Registry`.
+  3. Deploy: Применение манифестов `Kubernetes (Deployment, Service, Ingress)` для развертывания новой версии приложения в кластер.
 
 ---
 
@@ -180,20 +180,24 @@ spec:
 
 <img width="1920" height="1080" alt="Снимок экрана (3560)" src="https://github.com/user-attachments/assets/25ad0376-7914-4846-b3d5-8a2b00392c9c" />
 
-Yandex Container Registry
+---
+
+## `Yandex Container Registry`
 ```bash
 docker pull cr.yandex/crpil6qbhst9ijov98qr/nginx-app:latest
 docker run -d -p 8080:80 --name my-nginx-app cr.yandex/crpil6qbhst9ijov98qr/nginx-app:latest
 ```
+---
+
 <img width="1920" height="1080" alt="Снимок экрана (3623)" src="https://github.com/user-attachments/assets/2daefe60-79cb-47e0-b975-53ba3007da67" />
 
 ---
 
-## 5. Система мониторинга (Prometheus & Grafana)
+## 5. Система мониторинга `(Prometheus & Grafana)`
 
 ### 5.1. Описание
 
-Для сбора и визуализации метрик состояния кластера и узлов используется связка Prometheus и Grafana.
+Для сбора и визуализации метрик состояния кластера и узлов используется связка `Prometheus` и `Grafana`.
 
 ---
 
@@ -207,7 +211,7 @@ helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
 
 ---
 
-### 5.3. Настройка Grafana
+### 5.3. Настройка `Grafana`
 
 1. Добавление Prometheus как источника данных (Data Source) по адресу http://prometheus.monitoring:9090 (или                       http://prometheus.monitoring.svc.cluster.local:9090).
 2. Импорт или настройка дашборда Node Exporter Full.
@@ -227,17 +231,17 @@ helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring
 
 ---
 
-## 6. Система логирования (Loki & Promtail)
+## 6. Система логирования `(Loki & Promtail)`
 
 ### 6.1. Описание
 
-Для централизованного сбора и анализа логов всех контейнеров в кластере используется связка Loki и Promtail.
+Для централизованного сбора и анализа логов всех контейнеров в кластере используется связка `Loki` и `Promtail`.
 
 ### 6.2. Установка
 
 ---
 
-Loki устанавливается с помощью Helm, в режиме, где логи временно хранятся в оперативной памяти (без Persistent Volumes, так как в кластере не был настроен StorageClass).
+`Loki` устанавливается с помощью `Helm`, в режиме, где логи временно хранятся в оперативной памяти (без `Persistent Volumes`, так как в кластере не был настроен `StorageClass`).
 
 ```bash
 helm repo add grafana https://grafana.github.io/helm-charts
@@ -250,11 +254,11 @@ helm install loki grafana/loki-stack \
 
 ---
 
-### 6.3. Настройка Grafana
+### 6.3. Настройка `Grafana`
 
-   1. Добавление Loki как источника данных (Data Source) по адресу http://loki.monitoring:3100.
-   2. Переход в раздел Explore, выбор источника Loki.
-   3. Фильтрация логов по неймспейсам (например, namespace="monitoring") и запуск запроса.
+   1. Добавление `Loki` как источника данных `(Data Source)` по адресу http://loki.monitoring:3100.
+   2. Переход в раздел Explore, выбор источника `Loki`.
+   3. Фильтрация логов по неймспейсам (например, `namespace="monitoring"`) и запуск запроса.
 
 ---
 
@@ -277,7 +281,7 @@ helm install loki grafana/loki-stack \
 
 ## 7. Заключение
 
-В рамках дипломного проекта была успешно построена современная, автоматизированная IT-инфраструктура с использованием кластера Kubernetes. Внедрен полный стек Observability (Prometheus, Grafana, Loki), обеспечивающий мониторинг состояния кластера и приложений, а также централизованный сбор и анализ логов. Весь цикл жизненного цикла инфраструктуры и приложений управляется с помощью кода (IaC, Configuration as Code) и автоматизированных CI/CD пайплайнов, что соответствует лучшим практикам DevOps.
+В рамках дипломного проекта была успешно построена современная, автоматизированная IT-инфраструктура с использованием кластера Kubernetes. Внедрен полный стек `Observability (Prometheus, Grafana, Loki)` обеспечивающий мониторинг состояния кластера и приложений, а также централизованный сбор и анализ логов. Весь цикл жизненного цикла инфраструктуры и приложений управляется с помощью кода `(IaC, Configuration as Code)` и автоматизированных `CI/CD` пайплайнов, что соответствует лучшим практикам `DevOps`.
 
 
 
