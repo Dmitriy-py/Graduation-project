@@ -75,7 +75,7 @@ Kubespray, основанный на Ansible, автоматизирует пр�
 
    1. Клонирование репозитория Kubespray.
    2. Настройка файла инвентаря (inventory/mycluster/hosts.yaml) с IP-адресами, полученными от Terraform.
-   3. Настройка конфигурационных файлов (inventory/mycluster/group_vars/) для выбора containerd как рантайма и calico в качестве       CNI.
+   3. Настройка конфигурационных файлов (inventory/mycluster/group_vars/) для выбора containerd как рантайма и calico в качестве CNI.
    4. Активация виртуального окружения Python.
 
 ---
@@ -179,6 +179,13 @@ spec:
 ---
 
 <img width="1920" height="1080" alt="Снимок экрана (3560)" src="https://github.com/user-attachments/assets/25ad0376-7914-4846-b3d5-8a2b00392c9c" />
+
+Yandex Container Registry
+```bash
+docker pull cr.yandex/crpil6qbhst9ijov98qr/nginx-app:latest
+docker run -d -p 8080:80 --name my-nginx-app cr.yandex/crpil6qbhst9ijov98qr/nginx-app:latest
+```
+<img width="1920" height="1080" alt="Снимок экрана (3623)" src="https://github.com/user-attachments/assets/2daefe60-79cb-47e0-b975-53ba3007da67" />
 
 ---
 
