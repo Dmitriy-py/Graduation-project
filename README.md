@@ -30,7 +30,7 @@ Terraform используется для декларативного упра�
 *   Подсети в трех зонах доступности
 *   NAT Gateway для исходящего доступа из подсетей
 *   Три виртуальные машины: 1 Master-Node (control-plane) и 2 Worker-Nodes.
-*   Настроен SSH-доступ и автоматическое назначение внешних IP-адресов.
+*   Настроен SSH-доступ.
 
 ### 1.2. Ключевые команды
 ```bash
@@ -42,3 +42,148 @@ terraform plan
 
 # Применение изменений (создание ресурсов)
 terraform apply -auto-approve
+```
+
+<img width="1920" height="1080" alt="Снимок экрана (3608)" src="https://github.com/user-attachments/assets/570f4a4d-db7e-4766-a2fe-d84d01804e07" />
+
+<img width="1920" height="1080" alt="Снимок экрана (3610)" src="https://github.com/user-attachments/assets/1f428b44-0091-485a-829d-fdf1e946e88f" />
+
+<img width="1920" height="1080" alt="Снимок экрана (3609)" src="https://github.com/user-attachments/assets/0fa193ff-2846-4a62-acd1-2326380ca662" />
+
+<img width="1920" height="1080" alt="Снимок экрана (3624)" src="https://github.com/user-attachments/assets/7426d827-0b97-433b-aa8d-fc48e6dba949" />
+
+## 2. Развертывание кластера Kubernetes (Kubespray)
+
+### 2.1. Описание
+
+Kubespray, основанный на Ansible, автоматизирует процесс установки и настройки Kubernetes. Был выбран Kubernetes версии v1.35.4.
+
+### 2.2.  Процесс развертывания
+
+   1. Клонирование репозитория Kubespray.
+   2. Настройка файла инвентаря (inventory/mycluster/hosts.yaml) с IP-адресами, полученными от Terraform.
+   3. Настройка конфигурационных файлов (inventory/mycluster/group_vars/) для выбора containerd как рантайма и calico в качестве       CNI.
+   4. Активация виртуального окружения Python.
+
+### 2.3. Ключевые команды
+```bash
+git clone https://github.com/Dmitriy-py/diploma-ansible-kubespray.git
+git clone https://github.com/Dmitriy-py/diploma-infrastructure.git
+cd diploma-ansible-kubespray
+source venv/bin/activate
+ansible-playbook -i inventory/mycluster/hosts.yaml cluster.yml -b -v
+```
+<img width="1920" height="1080" alt="Снимок экрана (3554)" src="https://github.com/user-attachments/assets/1f7bfdfe-c20f-4abc-84c2-ee29c613fb1c" />
+
+<img width="1920" height="1080" alt="Снимок экрана (3516)" src="https://github.com/user-attachments/assets/2dcb0908-9198-4297-93dd-2c80066a1059" />
+
+## 3. Сетевая связность и Ingress Controller
+
+### 3.1. Описание
+
+Для обеспечения внешнего доступа к сервисам кластера развернут Nginx Ingress Controller.
+   * Выбор: Использован тип сервиса NodePort (порт 30080) для прямого доступа к Ingress Controller.
+   * DNS: Для удобства использован сервис nip.io для привязки доменных имен к IP-адресам.
+
+### 3.2. Установка Ingress Controller
+```bash
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx --create-namespace \
+  --set controller.service.type=NodePort \
+  --set controller.service.nodePorts.http=30080
+```
+### 3.3. Манифест Ingress для Grafana
+
+ Данный манифест направляет трафик на сервис Grafana.
+ ```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: grafana.93.77.180.95.nip.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus-grafana
+            port:
+              number: 80
+```
+## 4. CI/CD для приложения
+
+### 4.1. Описание
+
+Разработан пайплайн непрерывной интеграции и доставки (CI/CD) для приложения с использованием GitHub Actions.
+
+### 4.2. Репозиторий приложения
+
+  * [diploma-app](https://github.com/Dmitriy-py/diploma-app)
+
+### 4.3. Workflow CI/CD (.github/workflows/deploy.yml)
+
+Пайплайн автоматизирует следующие шаги:
+  1. Сборка Docker-образа: Создание образа приложения.
+  2. Push Образа: Отправка собранного образа в Yandex Container Registry.
+  3. Deploy: Применение манифестов Kubernetes (Deployment, Service, Ingress) для развертывания новой версии приложения в             кластер.
+
+<img width="1920" height="1080" alt="Снимок экрана (3612)" src="https://github.com/user-attachments/assets/d685577c-d0f0-4588-85cb-abe729145a5b" />
+
+<img width="1920" height="1080" alt="Снимок экрана (3625)" src="https://github.com/user-attachments/assets/6eef1640-6898-4546-b6fb-70d30c3273bb" />
+
+<img width="1920" height="1080" alt="Снимок экрана (3560)" src="https://github.com/user-attachments/assets/25ad0376-7914-4846-b3d5-8a2b00392c9c" />
+
+## 5. Система мониторинга (Prometheus & Grafana)
+
+### 5.1. Описание
+
+Для сбора и визуализации метрик состояния кластера и узлов используется связка Prometheus и Grafana.
+
+### 5.2. Установка
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install prometheus prometheus-community/kube-prometheus-stack -n monitoring --create-namespace
+```
+
+### 5.3. Настройка Grafana
+
+1. Добавление Prometheus как источника данных (Data Source) по адресу http://prometheus.monitoring:9090 (или                       http://prometheus.monitoring.svc.cluster.local:9090).
+2. Импорт или настройка дашборда Node Exporter Full.
+3. Выбор источника данных Prometheus, Job node-exporter и нужного узла (например, master) в фильтрах дашборда.
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/dbadf7fe-c09a-4c09-9771-bca0b33e262b" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
